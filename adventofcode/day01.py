@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import numpy as np
 
 
@@ -18,3 +19,5 @@ def solve():
     digits = number_to_digits(PUZZLE_INPUT)
     print('-- adjacent : ', sum_matching(digits, 1))
     print('-- halfway  : ', sum_matching(digits, len(digits)//2))
+
+
