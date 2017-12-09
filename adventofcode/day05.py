@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 
 
-PUZZLE_INPUT = "0 3 0 1 -3"
-
-
-def follow_jumps(ops):
+def follow_jumps(ops, spooky=False):
     ops = ops.copy()
     address = 0
     counter = 0
     try:
         while True:
             offset = ops[address]
-            ops[address] += 1
+            ops[address] += -1 if spooky and offset >= 3 else 1
             address += offset
             counter += 1
     except IndexError:
@@ -19,7 +16,9 @@ def follow_jumps(ops):
 
 
 def solve():
-    ops = [int(s) for s in PUZZLE_INPUT.split()]
+    with open('pi05.txt', 'r') as f:
+        ops = [int(s) for s in f.read().split()]
     print('-- number of jumps :', follow_jumps(ops))
+    print('-- jumps if spooky :', follow_jumps(ops, spooky=True))
 
 
