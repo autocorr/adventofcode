@@ -3,7 +3,7 @@
 import numpy as np
 
 
-PUZZLE_INPUT = "0 2 7 0"
+PUZZLE_INPUT = "4	1	15	12	0	9	9	5	5	8	7	3	14	5	12	3"
 
 
 def parse_input(puzzle_input):
@@ -20,8 +20,7 @@ def redistributed(banks):
     banks += np.roll(leftover, shift=max_bank+1) + max_value // n_banks
 
 
-def process_until_loop(banks):
-    banks = banks.copy()
+def processed_until_loop(banks):
     counter = 0
     previous_states = [tuple(banks)]
     while True:
@@ -37,6 +36,7 @@ def process_until_loop(banks):
 
 def solve():
     banks = parse_input(PUZZLE_INPUT)
-    print('-- distributions before loop :', process_until_loop(banks))
+    print('-- distributions before loop :', processed_until_loop(banks))
+    print('-- distributions after loop  :', processed_until_loop(banks))
 
 
