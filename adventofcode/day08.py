@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# NOTE this method would make a lot more sense in Racket! The use of
-# metapgrogramming with `locals` and `eval` is likely a poor solution
-# because it is totally opaque what `eval(instr.macro)` does.
+# This a more standard solution without abusing the runtime.
+
+import operator
 
 
 TEST_DATA = """
@@ -18,25 +18,29 @@ class Register:
 
 
 class Instruction:
-    macro_fmt = 'if creg.v {op} {cval}: treg.v += {dval}'
+    op_map = {
+        '>':  operator.gt,
+        '<':  operator.lt,
+        '>=': operator.ge,
+        '<=': operator.le,
+        '==': operator.eq,
+        '!=': operator.ne,
+    }
 
     def __init__(self, line):
         params = line.split()
+        sign = 1 if params[1] == 'inc' else -1
         self.tname = params[0]
         self.cname = params[4]
-        sign = 1 if params[1] == 'inc' else -1
-        self.macro = self.macro_fmt.format(
-            cname=self.cname,
-            op=params[5],
-            cval=params[6],
-            tname=self.tname,
-            dval=sign*int(params[2]),
-        )
+        self.op = self.op_map[params[5]]
+        self.cval = int(params[6])
+        self.dval = sign*int(params[2])
 
-    def compute(self, regs):
-        treg = regs[self.tname]
-        creg = regs[self.cname]
-        exec(self.macro)
+    def compute(self, registers):
+        treg = registers[self.tname]
+        creg = registers[self.cname]
+        if self.op(creg.v, self.cval):
+            treg.v += self.dval
         return treg.v
 
 
