@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import numpy as np
 
-PUZZLE_INPUT = """
+
+TEST_INPUT = """
 pbga (66)
 xhth (57)
 ebii (61)
@@ -25,8 +27,17 @@ class Program:
         self.children = children
         self.parent = None
 
+    def __repr__(self):
+        fmt = '<Program: {0} ({1}) [{2}]>'
+        if self.children is not None:
+            child_str = ' '.join(c.name for c in self.children)
+        else:
+            child_str = 'None'
+        return fmt.format(self.name, self.weight, child_str)
+
     @staticmethod
     def from_str(line):
+        # FIXME could use regex for better performance
         line = (line
             .replace('(', '')
             .replace(')', '')
@@ -39,6 +50,31 @@ class Program:
             head, children = line, None
         name, weight = head.split()
         return Program(name, int(weight), children)
+
+    @property
+    def siblings(self):
+        return self.parent.children
+
+    @property
+    def tower_weight(self):
+        if self.children is None:
+            return self.weight
+        else:
+            return self.weight + sum(
+                c.tower_weight for c in self.children
+            )
+
+    @property
+    def which_unbalanced(self):
+        weights = np.array([
+            c.tower_weight for c in self.children
+        ])
+        if (weights == weights.max()).all():
+            sib_w = [c.tower_weight for c in self.siblings]
+            delta = max(sib_w) - min(sib_w)
+            return self, self.weight - delta, sib_w
+        else:
+            return self.children[weights.argmax()].which_unbalanced
 
 
 def link_programs(lines):
@@ -65,8 +101,11 @@ def link_programs(lines):
 
 
 def solve():
-    lines = PUZZLE_INPUT.strip().split('\n')
+    with open('pi07.txt', 'r') as f:
+        lines = f.read().strip().split('\n')
+    #lines = TEST_INPUT.strip().split('\n')
     root = link_programs(lines)
     print('-- root program :', root.name)
+    print('-- unbalanced :', root.which_unbalanced)
 
 
