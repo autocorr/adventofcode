@@ -13,40 +13,17 @@ c inc -20 if c == 10
 
 
 class Register:
-    def __init__(self, name):
-        self.name = name
-        self.value = 0
-
-    def __iadd__(self, n):
-        self.value += n
-        return self
-
-    def __gt__(self, n):
-        return self.value > n
-
-    def __lt__(self, n):
-        return self.value < n
-
-    def __ge__(self, n):
-        return self.value >= n
-
-    def __le__(self, n):
-        return self.value <= n
-
-    def __eq__(self, n):
-        return self.value == n
-
-    def __neq__(self, n):
-        return self.value != n
+    def __init__(self):
+        self.v = 0
 
 
 class Instruction:
-    macro_fmt = 'if {cname} {op} {cval}: {tname} += {dval}'
+    macro_fmt = 'if creg.v {op} {cval}: treg.v += {dval}'
 
     def __init__(self, line):
         params = line.split()
-        self.tname = params[0] + '___'
-        self.cname = params[4] + '___'
+        self.tname = params[0]
+        self.cname = params[4]
         sign = 1 if params[1] == 'inc' else -1
         self.macro = self.macro_fmt.format(
             cname=self.cname,
@@ -56,30 +33,31 @@ class Instruction:
             dval=sign*int(params[2]),
         )
 
+    def compute(self, regs):
+        treg = regs[self.tname]
+        creg = regs[self.cname]
+        exec(self.macro)
+        return treg.v
+
 
 class Cpu:
     def __init__(self, lines):
         self.max_value_held = 0
         self.instructions = [Instruction(l) for l in lines]
-        self.registers = self.init_registers()
-        self.execute()
-
-    def init_registers(self):
-        return {
-            instr.tname: Register(instr.tname)
+        self.registers = {
+            instr.tname: Register()
             for instr in self.instructions
         }
+        self.execute()
 
     def execute(self):
-        locals().update(self.registers)
         for instr in self.instructions:
-            exec(instr.macro)
-            computed = self.registers[instr.tname].value
-            if computed > self.max_value_held:
-                self.max_value_held = computed
+            result = instr.compute(self.registers)
+            if result > self.max_value_held:
+                self.max_value_held = result
 
     def max(self):
-        return max(reg.value for reg in self.registers.values())
+        return max(reg.v for reg in self.registers.values())
 
 
 def solve():

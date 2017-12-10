@@ -14,21 +14,20 @@ c inc -20 if c == 10
 
 class Register:
     def __init__(self):
-        self.value = 0
+        self.v = 0
 
 
 class Instruction:
     op_map = {
-        '>': operator.gt,
-        '<': operator.lt,
+        '>':  operator.gt,
+        '<':  operator.lt,
         '>=': operator.ge,
         '<=': operator.le,
         '==': operator.eq,
-        '!=': operator.neq,
+        '!=': operator.ne,
     }
 
     def __init__(self, line):
-        self.line = line
         params = line.split()
         sign = 1 if params[1] == 'inc' else -1
         self.tname = params[0]
@@ -38,11 +37,11 @@ class Instruction:
         self.dval = sign*int(params[2])
 
     def compute(self, registers):
-        target_reg = registers[self.tname]
-        comparison_reg = registers[self.cname]
-        if self.op(comparison.value, self.cval):
-            target_reg.value += self.dval
-        return target_reg.value
+        treg = registers[self.tname]
+        creg = registers[self.cname]
+        if self.op(creg.v, self.cval):
+            treg.v += self.dval
+        return treg.v
 
 
 class Cpu:
@@ -62,7 +61,7 @@ class Cpu:
                 self.max_value_held = result
 
     def max(self):
-        return max(reg.value for reg in self.registers.values())
+        return max(reg.v for reg in self.registers.values())
 
 
 def solve():
