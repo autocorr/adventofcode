@@ -25,23 +25,19 @@ def dense_hash(ring):
     return ''.join('{0:0>2x}'.format(i) for i in xored)
 
 
-def solve_first():
+def knot_hash(string):
+    ring = np.arange(256)
+    suffix = [17, 31, 73, 47, 23]
+    offsets = np.array([ord(c) for c in string]+suffix)
+    hashed_sparse(ring, offsets, trials=64)
+    return dense_hash(ring)
+
+
+def solve():
     ring = np.arange(256)
     offsets = np.array(PUZZLE_INPUT.split(','), dtype=int)
     hashed_sparse(ring, offsets)
     print('-- product 1 & 2 :', ring[0]*ring[1])
-
-
-def solve_second():
-    ring = np.arange(256)
-    suffix = [17, 31, 73, 47, 23]
-    offsets = np.array([ord(c) for c in PUZZLE_INPUT]+suffix)
-    hashed_sparse(ring, offsets, trials=64)
-    print('-- knot hash :', dense_hash(ring))
-
-
-def solve():
-    solve_first()
-    solve_second()
+    print('-- knot hash :', knot_hash(PUZZLE_INPUT))
 
 
